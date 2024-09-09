@@ -110,41 +110,26 @@ tar xzvf model_param.tar.gz
 
 If the installation was successful, the directory structure of your MetaEnzMap folder will be as follows:  
 
+```
 |-- MetaEnzMap  
-
     |-- bowtie2_index  
-
         |-- human  
-
             └── human.1.bt2  
-
             └── human.2.bt2  
-
             └── human.3.bt2  
-
             └── human.4.bt2  
-
             └── human.rev.1.bt2  
-
             └── human.rev.2.bt2  
-
     |-- checkm_data  
-
     |-- FEDKEA  
-
     └── bin_quantity.py  
-
     └── build_index.py  
-
     └── calculate_rpkm.py  
-
     └── main.py  
-
     └── utils.py  
-
     └── MetaEnzMap.yaml  
-
     └── README.md  
+```
 
 ## How to use this pipeline
 The pipeline can be used in two modes: a one-step execution or a stepwise execution. Below, I will introduce both usage methods.
@@ -158,11 +143,11 @@ The CPU server needs to be configured with the MetaEnzMap-related software, whil
 
 By default, the current path is within a folder named 'test', which contains two files: test_1.fq.gz and test_2.fq.gz  
 
+```
 |-- test
-
     └── test_1.fq.gz
-
     └── test_2.fq.gz
+```
 
 `python {path}/MetaEnzMap/main.py -1 test_1.fq.gz -2 test_2.fq.gz -w 32 -x human`
 
@@ -184,30 +169,20 @@ Parameter explanation and other optional parameters:
 
 After successfully completing this step, the folder structure will be as follows:  
 
+```
 |-- test
-
     |-- 1.fastp 
-
     |-- 2.bowtie2
-
     |-- 3.contigs
-
     |-- 4.index
-
     |-- 5.bins
-
     |-- 6.checkm
-
     |-- 7.high_quality_bins
-
     |-- 8.medium_quality_bins
-
     |-- 9.prodigal
-
     └── test_1.fq.gz
-
     └── test_2.fq.gz
-
+```
 
 **Step 2: protein enzyme prediction (on gpu server)**
 
@@ -215,11 +190,11 @@ Before running the FEDKEA software on the GPU server, you need to transfer the t
 
 Currently, your working directory is within the test folder.  
 
+```
 |-- test  
-
     |-- 9.prodigal
-
         └── test_high_bin_protein_partial00.fasta
+```
 
 run following command:
 
@@ -229,47 +204,34 @@ Detailed usage is seen: (https://github.com/Stevenleizheng/FEDKEA)
 
 After successfully completing this step, the folder structure will be as follows:  
 
+```
 |-- test
-
     |-- 9.prodigal
-
         └── test_high_bin_protein_partial00.fasta
-
     |-- 10.fedkea
-
         └── binary_result.txt
-
         └── enzyme_result.csv
+```
 
 Finally, transfer the results folder 10.fedkea obtained from the GPU server back to the test directory on the CPU server.
 
 Now, the test folder structure will be as follows:  
 
+```
 |-- test
-
     |-- 1.fastp 
-
     |-- 2.bowtie2
-
     |-- 3.contigs
-
     |-- 4.index
-
     |-- 5.bins
-
     |-- 6.checkm
-
     |-- 7.high_quality_bins
-
     |-- 8.medium_quality_bins
-
     |-- 9.prodigal
-
     |-- 10.fedkea
-
     └── test_1.fq.gz
-
     └── test_2.fq.gz
+```
 
 **Step 3: Metagenomic Enzyme mapping in Microbe (on cpu server)**
 
