@@ -10,8 +10,11 @@ This pipeline processes metagenomic data (primarily bacterial) through standard 
 2. This pipeline is mainly used to process high-quality sequencing data. If the sequencing data quality is bad, it may result in the generation of low-quality bins, thereby hindering the subsequent prediction of protein enzyme functions.
 3. The complete analytical pipeline requires **GPU** support.
 
-## 硬件条件
+## Hardware requirements
 
+**CPU**: It is recommended to use at least an 8-core, 16-thread processor or higher, with memory ranging from 32GB to 128GB or more.
+
+**GPU**: A GPU with a high number of CUDA cores and large memory is recommended, such as NVIDIA A100, A40, RTX 3090, or V100, with a minimum of 24GB VRAM or higher.
 
 ## Steps to install this pipeline (Internet connection required)
 
@@ -105,7 +108,7 @@ wget -c https://zenodo.org/records/13364055/files/model_param.tar.gz
 tar xzvf model_param.tar.gz
 ```
 
-If the installation was successful, the directory structure of your MetaEnzMap folder will be as follows:
+If the installation was successful, the directory structure of your MetaEnzMap folder will be as follows:  
 
 |-- MetaEnzMap  
 
@@ -153,7 +156,7 @@ The CPU server needs to be configured with the MetaEnzMap-related software, whil
 
 **Step 1: quality control, assembly, binning, ORF prediction (on cpu server)**  
 
-By default, the current path is within a folder named 'test', which contains two files: test_1.fq.gz and test_2.fq.gz
+By default, the current path is within a folder named 'test', which contains two files: test_1.fq.gz and test_2.fq.gz  
 
 |-- test
 
@@ -179,7 +182,7 @@ Parameter explanation and other optional parameters:
 
 -f: Choose the pipeline's running speed: for a faster option (parameter: 1), select MEGAHIT to assemble contigs [with good quality]; for a slower option (parameter: 0, default), select SPAdes to assemble contigs [with better quality], default=0
 
-After successfully completing this step, the folder structure will be as follows:
+After successfully completing this step, the folder structure will be as follows:  
 
 |-- test
 
@@ -210,7 +213,7 @@ After successfully completing this step, the folder structure will be as follows
 
 Before running the FEDKEA software on the GPU server, you need to transfer the test folder, the 9.prodigal folder, and the file test_high_bin_protein_partial00.fasta within it to the GPU server. 
 
-Currently, your working directory is within the test folder.
+Currently, your working directory is within the test folder.  
 
 |-- test  
 
@@ -224,7 +227,7 @@ run following command:
 
 Detailed usage is seen: (https://github.com/Stevenleizheng/FEDKEA)
 
-After successfully completing this step, the folder structure will be as follows:
+After successfully completing this step, the folder structure will be as follows:  
 
 |-- test
 
@@ -240,7 +243,7 @@ After successfully completing this step, the folder structure will be as follows
 
 Finally, transfer the results folder 10.fedkea obtained from the GPU server back to the test directory on the CPU server.
 
-Now, the test folder structure will be as follows:
+Now, the test folder structure will be as follows:  
 
 |-- test
 
