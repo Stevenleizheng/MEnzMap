@@ -1,4 +1,4 @@
-# MetaEnzMap (Metagenomic Enzyme mapping in Microbe)
+# MEnzMap (Metagenomic Enzyme mapping in Microbe)
 
 ## Description
 
