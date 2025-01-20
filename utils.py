@@ -116,7 +116,7 @@ def run_checkm(output, threads, name):
     ret = subprocess.call([f"checkm coverage -t {threads} -x fa {output}/5.bins/ {output}/6.tmp/coverage.tsv {output}/5.bins/{name}.sorted.bam"], shell=True)
     if ret != 0:
         sys.exit("Error: checkm error") 
-    ret = subprocess.call([f"checkm profile {output}/6.tmp/coverage.tsv -f {output}/6.checkm/{name}profile_result.tsv --tab_table"], shell=True)
+    ret = subprocess.call([f"checkm profile {output}/6.tmp/coverage.tsv -f {output}/6.checkm/{name}_profile_result.tsv --tab_table"], shell=True)
     if ret != 0:
         sys.exit("Error: checkm error") 
     subprocess.call([f"rm -rf {output}/6.tmp"], shell=True)

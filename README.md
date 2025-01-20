@@ -132,7 +132,7 @@ If the installation was successful, the directory structure of your MetaEnzMap f
 ```
 
 ## How to use this pipeline
-The pipeline can be used in two modes: a one-step execution or a stepwise execution. Below, I will introduce both usage methods.
+The pipeline can be used in one mode: a stepwise execution.
 
 ### a stepwise execution
 Attentions: If your CPU and GPU are not installed on the same server, you will need to use the stepwise execution mode.
@@ -252,5 +252,3 @@ A results folder named 11.enzyme_rpkm will eventually be generated in the test d
 **Interpretation of results file**
 
 The first column is the EC number, the second column represents the RPKM value for that class of enzymes, and each subsequent column corresponds to a specific microorganism, with the column headers being the taxonomic names. The value before the asterisk represents the number of ORF proteins predicted to have that enzyme function, while the value after the asterisk represents the abundance of the microorganism.
-
-### a one-step execution
