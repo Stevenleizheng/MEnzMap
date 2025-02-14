@@ -1,4 +1,4 @@
-name: MetaEnzMap
+name: menzmap
 channels: 
   - conda-forge
   - bioconda

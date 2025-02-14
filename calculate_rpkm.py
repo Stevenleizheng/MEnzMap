@@ -42,7 +42,7 @@ def calculate_rpkm(output,name):
     rpkm =rpkm.drop(columns=['# unique markers (of 43)'])
     rpkm =rpkm.drop(columns=['# multi-copy'])
     rpkm['Taxonomy'] = rpkm['Taxonomy'].str.split(';').str[-1].str.split('__').str[-1]
-    profile_result = pd.read_csv(f'{output}/6.checkm/{name}profile_result.tsv',sep='\t')
+    profile_result = pd.read_csv(f'{output}/6.checkm/{name}_profile_result.tsv',sep='\t')
     rpkm = pd.merge(rpkm, profile_result, on='Bin Id', how='left')
     rpkm =rpkm.drop(columns=['Bin size (Mbp)'])
     rpkm =rpkm.drop(columns=[f'{name}.sorted: mapped reads'])

@@ -26,15 +26,15 @@ This pipeline processes metagenomic data (primarily bacterial) through standard 
 
 2. Go to the directory of MetaEnzMap
 
-`cd MetaEnzMap`
+`cd MEnzMap`
 
 3. Install required softwares
 
-`conda env create -f MetaEnzMap.yaml`
+`conda env create -f MEnzMap.yaml`
 
 ### Step 2: get into the prepared conda environment
 
-`conda activate MetaEnzMap`
+`conda activate menzmap`
 
 ### Step 3: install checkm software and database
 
@@ -44,29 +44,35 @@ Simple installation method:
 
 The required software for CheckM has already been installed. Next, you only need to install CheckM and the relevant database via pip.
 
-The default path is now inside the folder MetaEnzMap.
+The default path is now inside the folder MEnzMap.
 
 ```
 pip3 install checkm-genome
-wget -c https://data.ace.uq.edu.au/public/CheckM_databases
-checkm data setRoot <checkm_data_dir>
+wget -c https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz
+mkdir checkm_data
+tar -xzvf checkm_data_2015_01_16.tar.gz -C checkm_data
+rm checkm_data_2015_01_16.tar.gz
+checkm data setRoot checkm_data
 ```
 
 ### Step 4: build Bowtie2 indexes for removing host sequences
 
-The default path is now inside the folder MetaEnzMap.
+The default path is now inside the folder MEnzMap.
 
 1. download the genomic fasta file of a certain host (e.g. human genome)
 
 ```
 wget -c https://ftp.ensembl.org/pub/release-112/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
-tar xzvf Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+gunzip Homo_sapiens.GRCh38.dna.toplevel.fa.gz
 mv Homo_sapiens.GRCh38.dna.toplevel.fa human.fa
 ```
 
 2. build a Bowtie2 index of human 
 
-`python build_index.py -f human.fa -t 4`
+```
+python build_index.py -f human.fa -t 16
+rm human.fa
+```
 
 ### Step 5: install FEDKEA software (FEDKEA needs gpu.)
 
@@ -93,25 +99,32 @@ If you want to use the GPU version, please go to https://pytorch.org/get-started
 
 b. fair-esm: `pip install fair-esm==2.0.0`
 
-c. pandas: `pip install pandas==1.4.2`
+c. pandas: `pip install pandas==1.4.2` (No installation is required as MEnzMap.yaml has already been installed.)
 
-d. biopython: `conda install -c bioconda biopython=1.78`
+d. biopython: `conda install -c bioconda biopython=1.78` (No installation is required as MEnzMap.yaml has already been installed.)
 
-e. numpy: `conda install numpy=1.26.2` or `pip install numpy==1.22.3`
+e. numpy: `conda install numpy=1.26.2` or `pip install numpy==1.22.3` (No installation is required as MEnzMap.yaml has already been installed.)
 
 f. scikit-learn: `pip install scikit-learn==1.2.0`
 
 4. download the trained model
 
 ```
-wget -c https://zenodo.org/records/13364055/files/model_param.tar.gz
-tar xzvf model_param.tar.gz
+wget -c https://zenodo.org/records/14868763/files/model_param.tar.gz
+tar -xzvf model_param.tar.gz
+```
+
+If you want to test whether the pipeline runs correctly, we have provided a test dataset. Please download the data from the website below. The current path is within a folder named 'MEnzMap'.
+
+```
+wget -c https://zenodo.org/records/14868763/files/test.tar.gz
+tar -xzvf test.tar.gz
 ```
 
 If the installation was successful, the directory structure of your MetaEnzMap folder will be as follows:  
 
 ```
-|-- MetaEnzMap  
+|-- MEnzMap  
     |-- bowtie2_index  
         |-- human  
             └── human.1.bt2  
@@ -121,35 +134,46 @@ If the installation was successful, the directory structure of your MetaEnzMap f
             └── human.rev.1.bt2  
             └── human.rev.2.bt2  
     |-- checkm_data  
+        └── distributions/
+        └── genome_tree/
+        └── hmms/
+        └── hmms_ssu/
+        └── img/
+        └── pfam/
+        └── test_data/
+        └── .dmanifest
+        └── selected_marker_sets.tsv
+        └── taxon_marker_sets.tsv
     |-- FEDKEA  
-    └── bin_quantity.py  
+    |-- test
+    └── .dmanifest 
     └── build_index.py  
     └── calculate_rpkm.py  
     └── main.py  
     └── utils.py  
-    └── MetaEnzMap.yaml  
+    └── MEnzMap.yaml  
     └── README.md  
 ```
 
 ## How to use this pipeline
-The pipeline can be used in one mode: a stepwise execution.
+The pipeline can be used in one mode: a stepwise execution. 
 
 ### a stepwise execution
 Attentions: If your CPU and GPU are not installed on the same server, you will need to use the stepwise execution mode.
 
-The CPU server needs to be configured with the MetaEnzMap-related software, while the GPU server should be set up with the FEDKEA-related software.
+The CPU server needs to be configured with the MEnzMap-related software, while the GPU server should be set up with the FEDKEA-related software.
 
 **Step 1: quality control, assembly, binning, ORF prediction (on cpu server)**  
 
-By default, the current path is within a folder named 'test', which contains two files: test_1.fq.gz and test_2.fq.gz  
+By default, the current path is within a folder named 'MEnzMap', which contains two files: test_1.fq.gz and test_2.fq.gz  
 
 ```
 |-- test
-    └── test_1.fq.gz
-    └── test_2.fq.gz
+    └── test_1.fastq.gz
+    └── test_2.fastq.gz
 ```
 
-`python {path}/MetaEnzMap/main.py -1 test_1.fq.gz -2 test_2.fq.gz -w 32 -x human`
+`python main.py -1 test/test_1.fastq.gz -2 test/test_2.fastq.gz -w 16 -x human -o test`
 
 Parameter explanation and other optional parameters:
 
@@ -180,9 +204,11 @@ After successfully completing this step, the folder structure will be as follows
     |-- 7.high_quality_bins
     |-- 8.medium_quality_bins
     |-- 9.prodigal
-    └── test_1.fq.gz
-    └── test_2.fq.gz
+    └── test_1.fastq.gz
+    └── test_2.fastq.gz
 ```
+
+This step took 1 hour.
 
 **Step 2: protein enzyme prediction (on gpu server)**
 
@@ -198,7 +224,12 @@ Currently, your working directory is within the test folder.
 
 run following command:
 
-`python {path}/FEDKEA/main.py -i 9.prodigal/test_high_bin_protein_partial00.fasta -b 32 -d 10.fedkea/ -o 10.fedkea/ -g '0' -a 1`
+```
+python FEDKEA/main.py -i test/9.prodigal/test_high_bin_protein_partial00.fasta -b 32 -d test/10.fedkea/data/ -o test/10.fedkea/result/ -g '0' -a 1
+rm -rf test/10.fedkea/data/
+mv test/10.fedkea/result/* test/10.fedkea/
+rm -rf result
+```
 
 Detailed usage is seen: (https://github.com/Stevenleizheng/FEDKEA)
 
@@ -232,14 +263,15 @@ Now, the test folder structure will be as follows:
     └── test_1.fq.gz
     └── test_2.fq.gz
 ```
+This step took 1 hour.
 
 **Step 3: Metagenomic Enzyme mapping in Microbe (on cpu server)**
 
-The current path is within a folder named 'test'.
+The current path is within a folder named 'MEnzMap'.
 
 Run this command:
 
-`python {path}/MetaEnzMap/calculate_rpkm.py -1 test_1.fq.gz`
+`python calculate_rpkm.py -1 test/test_1.fq.gz -o test`
 
 Parameter explanation and other optional parameters:
 
