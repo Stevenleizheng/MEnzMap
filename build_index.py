@@ -4,6 +4,16 @@ import sys
 import subprocess
 
 def parameter_input():
+    """Parse command-line arguments for Bowtie2 index management.
+    
+    Returns:
+        argparse.Namespace: Parsed command-line arguments with following attributes:
+        - fasta (str): Path to host genome FASTA file
+        - name (str): Name of index to remove
+        - threads (int): CPU threads for building
+        - remove (bool): Removal flag
+        - check (bool): List indices flag
+    """
     parser = argparse.ArgumentParser(description='Build Bowtie2 indexes for host removal')
     parser.add_argument('-f', '--fasta', help='Path to the genome fasta file of host (.fna/.fa/.fasta)')
     parser.add_argument('-n', '--name', help='Name of the Bowtie2 index needed to remove')
@@ -14,6 +24,19 @@ def parameter_input():
     return args  
 
 def get_name(input):
+    """Extract base filename from FASTA file path by removing extension.
+    
+    Handles .fna, .fa, and .fasta file extensions. The validation is case-sensitive.
+    
+    Args:
+        input (str): Input filename or path containing a FASTA extension
+        
+    Returns:
+        str: Base filename without the extension
+        
+    Raises:
+        SystemExit: If input doesn't end with a recognized FASTA extension
+    """
     if input[-4:] == '.fna':
         return input[:-4]
     elif input[-3:] == '.fa':

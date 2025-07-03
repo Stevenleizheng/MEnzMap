@@ -6,6 +6,15 @@ from Bio import SeqIO
 
 
 def run_fastp(input1, input2, threads, output, name):
+    """Perform quality control and adapter trimming on raw sequencing data.
+    
+    Args:
+        input1 (str): Path to read1 FASTQ file
+        input2 (str): Path to read2 FASTQ file
+        threads (int): Number of CPU threads to use
+        output (str): Output directory path
+        name (str): Sample name for output files
+    """
     print("Run fastp")
     if os.path.exists(f"{output}/1.fastp") is True:
         subprocess.call([f"rm -rf {output}/1.fastp"], shell=True)
@@ -15,6 +24,14 @@ def run_fastp(input1, input2, threads, output, name):
         print("Warning: fastqc error")
 
 def run_bowtie2(output, threads, name, index_path):
+    """Perform host DNA removal using Bowtie2 alignment.
+    
+    Args:
+        output (str): Output directory path
+        threads (int): CPU threads for alignment
+        name (str): Sample identifier
+        index_path (list): Bowtie2 index paths for host genomes
+    """
     if len(index_path) == 0:
         print("No need for running bowtie2")
     else:
@@ -34,6 +51,13 @@ def run_bowtie2(output, threads, name, index_path):
         subprocess.call([f"rm {output}/2.bowtie2/tmp.sam"], shell=True)
 
 def run_spades(output, threads, name):
+    """Execute metagenomic assembly using SPAdes with quality-controlled reads.
+    
+    Args:
+        output (str): Output directory path
+        threads (int): CPU threads for assembly
+        name (str): Sample identifier
+    """
     print("Run spades")
     if os.path.exists(f"{output}/3.contigs") is True:
         subprocess.call([f"rm -rf {output}/3.contigs"], shell=True)
@@ -44,6 +68,13 @@ def run_spades(output, threads, name):
     subprocess.call([f"find {output}/3.contigs -mindepth 1 ! -name 'contigs.fasta' -delete"], shell=True)
 
 def run_megahit(output, threads, name):
+    """Execute metagenomic assembly using MEGAHIT for rapid contig generation.
+    
+    Args:
+        output (str): Output directory path
+        threads (int): CPU threads for assembly
+        name (str): Sample identifier
+    """
     print("Run megahit")
     if os.path.exists(f"{output}/3.contigs") is True:
         subprocess.call([f"rm -rf {output}/3.contigs"], shell=True)
@@ -55,6 +86,13 @@ def run_megahit(output, threads, name):
     subprocess.call([f"mv {output}/3.contigs/final.contigs.fa {output}/3.contigs/contigs.fasta"], shell=True)
 
 def run_bowtie2_build_index(output, threads, name):
+    """Build Bowtie2 index from assembled contigs for read alignment.
+    
+    Args:
+        output (str): Output directory path
+        threads (int): CPU threads for index construction
+        name (str): Sample identifier (unused in current implementation)
+    """
     print("Run bowtie2_build index")
     if os.path.exists(f"{output}/4.index") is True:
         subprocess.call([f"rm -rf {output}/4.index"], shell=True)
@@ -64,6 +102,13 @@ def run_bowtie2_build_index(output, threads, name):
         sys.exit("Error: bowtie2-build error") 
 
 def run_bins(output, threads, name):
+    """Execute metagenomic binning process using Bowtie2 and MetaBAT2.
+    
+    Args:
+        output (str): Output directory path
+        threads (int): CPU threads for parallel processing
+        name (str): Sample identifier
+    """
     print("Run bins")
     if os.path.exists(f"{output}/5.bins") is True:
         subprocess.call([f"rm -rf {output}/5.bins"], shell=True)
@@ -91,6 +136,19 @@ def run_bins(output, threads, name):
         sys.exit("Error: metabat2 error")
 
 def run_checkm(output, threads, name):
+    """Execute CheckM quality assessment workflow for metagenomic bins.
+    
+    Args:
+        output (str): Output directory path
+        threads (int): CPU threads for parallel processing
+        name (str): Sample identifier
+    
+    Workflow Steps:
+    1. Lineage-specific marker analysis
+    2. Phylogenetic tree construction
+    3. Quality assessment reporting
+    4. Coverage profiling
+    """
     print("Run checkm")
     if os.path.exists(f"{output}/6.tmp") is True:
         subprocess.call([f"rm -rf {output}/6.tmp"], shell=True)
@@ -126,6 +184,19 @@ def run_checkm(output, threads, name):
     subprocess.call([f"rm -rf {output}/5.bins/{name}.sam"], shell=True)
 
 def select_bins(output,name):
+    """Filter and organize metagenomic bins based on CheckM quality metrics.
+    
+    Args:
+        output (str): Output directory path
+        name (str): Sample identifier
+        
+    Returns:
+        list: IDs of high-quality bins
+        
+    Quality Thresholds:
+        High: ≥90% completeness, ≤5% contamination
+        Medium: ≥50% completeness, ≤10% contamination
+    """
     print("Select high quality and medium quality bins")
     if os.path.exists(f"{output}/7.high_quality_bins") is True:
         subprocess.call([f"rm -rf {output}/7.high_quality_bins"], shell=True)
@@ -147,21 +218,40 @@ def select_bins(output,name):
     return  high_id
 
 def info_prodigal(output,name):
+    """Generate metadata mapping between predicted genes and their source contigs/bins.
+    
+    Args:
+        output (str): Output directory path
+        name (str): Sample identifier
+    
+    Output File:
+        Creates 'high_bin_prodigal.txt' with columns:
+        - sample_name: Identifier from sequencing run
+        - file_name: Source bin filename
+        - contig_name: Original contig identifier
+    """
     print("information of prodigal contigs and bins")
     with open(f'{output}/7.high_quality_bins/high_bin_prodigal.txt', 'w') as out_f:
-        # 写入标题行
         out_f.write('sample_name\tfile_name\tcontig_name\n')          
-        # 遍历指定目录中的所有文件
         for filename in os.listdir(f'{output}/7.high_quality_bins'):
-            if filename.endswith('.fasta') or filename.endswith('.fa'):  # 只处理FASTA文件
+            if filename.endswith('.fasta') or filename.endswith('.fa'):  
                 filepath = os.path.join(f'{output}/7.high_quality_bins', filename)
-                # 解析FASTA文件
                 with open(filepath, 'r') as fasta_file:
                     for record in SeqIO.parse(fasta_file, 'fasta'):
-                        # 写入文件名和序列名
                         out_f.write(f'{name}\t{filename}\t{record.id}\n')
 
 def run_prodigal(output,name):
+    """Execute Prodigal gene prediction on high-quality metagenomic bins.
+    
+    Args:
+        output (str): Output directory path
+        name (str): Sample identifier
+        
+    Output Files:
+        - GFF3 file: Structural annotations
+        - FNA file: Predicted gene nucleotide sequences
+        - FAA file: Predicted protein translations
+    """
     print("Run prodigal")
     if os.path.exists(f"{output}/9.prodigal") is True:
         subprocess.call([f"rm -rf {output}/9.prodigal"], shell=True)
@@ -172,24 +262,50 @@ def run_prodigal(output,name):
         sys.exit("Error: prodigal error") 
 
 def select_prodigal_partial00(output,name):
-    with open(f'{output}/9.prodigal/{name}_high_bin_protein_partial00.fasta', 'w') as out_f: # 修改位置
-        with open(f'{output}/9.prodigal/{name}_high_bin_protein.faa', 'r') as fasta_file: # 修改位置
+    """Filter and save complete gene predictions from Prodigal results.
+    
+    Args:
+        output (str): Output directory path
+        name (str): Sample identifier
+    
+    Biological Significance:
+        Selects only complete genes (no partial fragments) based on Prodigal's 
+        'partial=00' flag in sequence descriptions, indicating full CDS calls
+        from start to stop codon without truncation.
+    """
+    with open(f'{output}/9.prodigal/{name}_high_bin_protein_partial00.fasta', 'w') as out_f: 
+        with open(f'{output}/9.prodigal/{name}_high_bin_protein.faa', 'r') as fasta_file: 
             for record in SeqIO.parse(fasta_file, 'fasta'):
                 if 'partial=00' in record.description:
                     SeqIO.write(record, out_f, 'fasta')
-    with open(f'{output}/9.prodigal/{name}_high_bin_gene_partial00.fasta', 'w') as out_f: # 修改位置
-        with open(f'{output}/9.prodigal/{name}_high_bin_gene.fna', 'r') as fasta_file: # 修改位置
+    with open(f'{output}/9.prodigal/{name}_high_bin_gene_partial00.fasta', 'w') as out_f: 
+        with open(f'{output}/9.prodigal/{name}_high_bin_gene.fna', 'r') as fasta_file: 
             for record in SeqIO.parse(fasta_file, 'fasta'):
                 if 'partial=00' in record.description:
                     SeqIO.write(record, out_f, 'fasta')    
 
 
 # def run_fedkea(output,name):
+#     """Execute FEDKEA enzyme annotation pipeline on complete gene predictions.
+    
+#     Args:
+#         output (str): Output directory path
+#         name (str): Sample identifier
+        
+#     Output:
+#         Creates directory structure:
+#         - 10.fedkea/data/: Intermediate data storage
+#         - 10.fedkea/result/: Final annotation results
+        
+#     Parameters:
+#         -b 32: Batch size for parallel processing
+#         -a 1: Algorithm selection for enzyme prediction
+#     """
 #     print("Run fedkea")
 #     if os.path.exists(f"{output}/10.fedkea") is True:
 #         subprocess.call([f"rm -rf {output}/10.fedkea"], shell=True)
 #     subprocess.call([f"mkdir {output}/10.fedkea"], shell=True)  
-#     ret = subprocess.call([f"python {sys.path[0]}/FEDKEA/main.py -i {output}/9.prodigal/{name}_high_bin_protein_partial00.fasta -b 32 -d {output}/10.fedkea/data/ -o {output}/10.fedkea/result/ -a 1"], shell=True)
+#     ret = subprocess.call([f"python {sys.path[0]}/FEDKEA/main.py -i {output}/9.prodigal/{name}_high_bin_protein_partial00.fasta -b 32 -d {output}/10.fedkea/data/ -o {output}/10.fedkea/result/ "], shell=True)
 #     if ret != 0:
 #         sys.exit("Error: fedkea error") 
 
