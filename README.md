@@ -1,4 +1,4 @@
-# MEnzMap (Metagenomic Enzyme mapping in Microbe)
+# MEnzMap (Metagenomic Enzyme mapping in Microbes)
 
 ## Description
 
@@ -265,7 +265,7 @@ Now, the test folder structure will be as follows:
 ```
 This step took 1 hour.
 
-**Step 3: Metagenomic Enzyme mapping in Microbe (on cpu server)**
+**Step 3: Metagenomic Enzyme mapping in Microbes (on cpu server)**
 
 The current path is within a folder named 'MEnzMap'.
 
