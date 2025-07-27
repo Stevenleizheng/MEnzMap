@@ -4,7 +4,7 @@
 
 This pipeline processes metagenomic data (primarily bacterial) through standard quality control, assembly, binning, ORF prediction, and protein enzyme function prediction, ultimately generating the distribution profile of microbial enzymes in the metagenomic dataset.
 
-## Attentions
+## Attention
 
 1. This pipeline only supports paired-end fastq files in the phred33 format.
 2. This pipeline is mainly used to process high-quality sequencing data. If the sequencing data quality is bad, it may result in the generation of low-quality bins, thereby hindering the subsequent prediction of protein enzyme functions.
